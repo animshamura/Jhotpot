@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gunik - Rumor Scanner</title>
+    <!-- Link to Google Font for fantasy style -->
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
+    <style>
+        /* Resetting default styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Full-screen background */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: url('bg.jpg') center/cover no-repeat;
+            background-attachment: fixed;
+            color: white;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .container {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        /* Fantasy-style font for the title */
+        h1 {
+            font-family: 'Creepster', cursive;
+            font-size: 48px;
+            font-weight: 700;
+            color: #dd6312;
+            margin-bottom: 30px;
+            text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.7);
+        }
+
+        .input-group {
+            margin-bottom: 30px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            border-radius: 8px;
+            border: 2px solid #fff;
+            background-color: transparent;
+            color: white;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-color: #ff6f61;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            font-size: 20px;
+            border: none;
+            background-color: #4e92ff;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #3a79d6;
+        }
+
+        .result-card {
+            margin-top: 40px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            display: none;
+        }
+
+        .result-card h3 {
+            font-size: 24px;
+            color: #ff6f61;
+            margin-bottom: 20px;
+        }
+
+        .result-card p {
+            font-size: 16px;
+            color: #ddd;
+        }
+
+        .status {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .status.true {
+            color: #4caf50;
+        }
+
+        .status.false {
+            color: #f44336;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Gunik - Rumor Scanner</h1>
+        <div class="input-group">
+            <input type="text" id="rumorInput" placeholder="Enter a rumor to scan...">
+        </div>
+        <button onclick="scanRumor()">Scan Rumor</button>
+
+        <!-- Result Card -->
+        <div class="result-card" id="resultCard">
+            <h3>Scan Result:</h3>
+            <p id="rumorText">The rumor about the event...</p>
+            <p class="status" id="status">Scanning...</p>
+        </div>
+    </div>
+
+    <script>
+        async function scanRumor() {
+            const input = document.getElementById('rumorInput').value;
+            const resultCard = document.getElementById('resultCard');
+            const rumorText = document.getElementById('rumorText');
+            const status = document.getElementById('status');
+
+            // Validate input
+            if (input.trim() === "") {
+                alert("Please enter a rumor!");
+                return;
+            }
+
+            // Show loading state
+            rumorText.textContent = `Rumor: ${input}`;
+            status.textContent = "Scanning...";
+            status.className = "status";
+            resultCard.style.display = 'block';
+
+            try {
+                // Call the FastAPI backend
+                const response = await fetch("http://127.0.0.1:8000/scan-rumor", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ text: input }),
+                });
+
+                // Check if the response is OK
+                if (!response.ok) {
+                    throw new Error("Failed to scan rumor. Please try again.");
+                }
+
+                // Parse the JSON response
+                const data = await response.json();
+
+                // Update the UI with the result
+                status.textContent = data.is_rumor
+                    ? `This rumor is TRUE! (Confidence: ${data.confidence})`
+                    : `This rumor is FALSE! (Confidence: ${data.confidence})`;
+                status.className = data.is_rumor ? "status true" : "status false";
+            } catch (error) {
+                console.error(error);
+                status.textContent = "Error occurred while scanning rumor.";
+                status.className = "status";
+            }
+        }
+    </script>
+
+</body>
+</html>

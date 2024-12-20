@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aesthetic Login Page</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Basic reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Full-page background image */
+        body {
+            font-family: 'Roboto', sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: url('bg.jpg') center/cover no-repeat;
+            background-attachment: fixed;
+            color: white;
+            overflow: hidden;
+        }
+
+        /* Dark overlay to dim the background image */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5); /* Darker overlay */
+            z-index: 1;
+        }
+
+        /* Login card container */
+        .login-container {
+            position: relative;
+            z-index: 2;
+            background-color: rgba(0, 0, 0, 0.7); /* Slightly transparent dark background */
+            border-radius: 12px;
+            padding: 40px 30px;
+            width: 100%;
+            max-width: 380px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 36px;
+            font-weight: 500;
+            color: #fff;
+            margin-bottom: 30px;
+            letter-spacing: 1px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #fff;
+            border-radius: 8px;
+            background-color: transparent;
+            color: white;
+            font-size: 16px;
+            outline: none;
+            transition: 0.3s;
+            text-align: center;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            border-color: #ff6f61;
+        }
+
+        label {
+            position: absolute;
+            top: -12px;
+            left: 10px;
+            font-size: 14px;
+            color: #fff;
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 0 5px;
+            border-radius: 5px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: #ff6f61;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background-color: #e05a4f;
+        }
+
+        .forgot-password {
+            display: block;
+            margin-top: 10px;
+            color: #ddd;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .forgot-password:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            margin-top: 10px;
+            color: #ff6f61;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Overlay to dim the background image -->
+    <div class="overlay"></div>
+
+    <!-- Login Form Container -->
+    <div class="login-container">
+        <h1>Login</h1>
+        <div class="input-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" placeholder="Enter your username">
+        </div>
+        <div class="input-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="Enter your password">
+        </div>
+        <button type="submit" onclick="handleLogin()">Login</button>
+        <a href="#" class="forgot-password">Forgot your password?</a>
+        <div id="error-message" class="error-message"></div>
+    </div>
+
+    <script>
+        async function handleLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('error-message');
+
+            // Reset error message
+            errorMessage.textContent = '';
+
+            // Validate input
+            if (!username || !password) {
+                errorMessage.textContent = 'Both fields are required!';
+                return;
+            }
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password }),
+                });
+
+                if (response.ok) {
+                    // Redirect to dashboard on success
+                    window.location.href = '/userdash.html';
+                } else {
+                    const errorData = await response.json();
+                    errorMessage.textContent = errorData.error || 'Login failed. Please try again.';
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                errorMessage.textContent = 'An error occurred. Please try again later.';
+            }
+        }
+    </script>
+
+</body>
+</html>
